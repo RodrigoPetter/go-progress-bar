@@ -113,7 +113,8 @@ func (pb *ProgressBar) renderBar(leftPadding int) string {
 	terminalWidth, _, _ := term.GetSize(int(os.Stdout.Fd()))
 	barLength := terminalWidth - leftPadding - 6
 	progressRatio := float64(pb.progress) / float64(pb.maxProgress)
-	filledLength := int(float64(barLength) * progressRatio)
+	safeprogressRatio := min(progressRatio, 1)
+	filledLength := int(float64(barLength) * safeprogressRatio)
 	return "[" + fmt.Sprintf("%-4s", fmt.Sprintf("%d%%", int(progressRatio*100))) + strings.Repeat("#", filledLength) + strings.Repeat(" ", barLength-filledLength) + "]"
 }
 
@@ -165,7 +166,9 @@ func (pb *ProgressBar) Increment(amount int) {
 }
 
 func (pb *ProgressBar) Finish() {
-	pb.finishedAt = time.Now()
+	if pb.finishedAt.IsZero() {
+		pb.finishedAt = time.Now()
+	}
 	pb.progress = pb.maxProgress
 }
 
