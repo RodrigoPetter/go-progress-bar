@@ -54,7 +54,7 @@ func StartRenderLoop(pb *ProgressBar) {
 
 				fmt.Print("\033[J") // Clear everything below the current cursor position
 
-				//print any pending logs
+				// Print any pending logs
 				pb.logWriter.flush()
 
 				for _, r := range rowsToPrint {
@@ -98,12 +98,12 @@ func (pb *ProgressBar) render(leftPadding int) []string {
 }
 
 func (pb *ProgressBar) cleanupOldBars() {
-	SECONDS_TO_KEEP_BAR_AFTER_IT_FINISHES := 10.0
+	const secondsToKeepBarAfterFinish = 10.0
 	for i := len(pb.subBars) - 1; i >= 0; i-- {
 		subBar := pb.subBars[i]
 
-		//check if should cleanup the bar
-		if !subBar.finishedAt.IsZero() && time.Since(subBar.finishedAt).Seconds() > SECONDS_TO_KEEP_BAR_AFTER_IT_FINISHES {
+		// Check if should cleanup the bar
+		if !subBar.finishedAt.IsZero() && time.Since(subBar.finishedAt).Seconds() > secondsToKeepBarAfterFinish {
 			pb.subBars = append(pb.subBars[:i], pb.subBars[i+1:]...)
 		}
 	}
@@ -113,8 +113,8 @@ func (pb *ProgressBar) renderBar(leftPadding int) string {
 	terminalWidth, _, _ := term.GetSize(int(os.Stdout.Fd()))
 	barLength := terminalWidth - leftPadding - 6
 	progressRatio := float64(pb.progress) / float64(pb.maxProgress)
-	safeprogressRatio := min(progressRatio, 1)
-	filledLength := int(float64(barLength) * safeprogressRatio)
+	safeProgressRatio := min(progressRatio, 1)
+	filledLength := int(float64(barLength) * safeProgressRatio)
 	return "[" + fmt.Sprintf("%-4s", fmt.Sprintf("%d%%", int(progressRatio*100))) + strings.Repeat("#", filledLength) + strings.Repeat(" ", barLength-filledLength) + "]"
 }
 
